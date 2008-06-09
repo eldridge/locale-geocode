@@ -85,6 +85,8 @@ These codes were taken directly from Locale::SubCountry.
 
 =cut
 
+our $VERSION = 1.0;
+
 use Locale::Geocode::Territory;
 use Locale::Geocode::Division;
 use XML::Simple;
