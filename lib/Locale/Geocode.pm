@@ -11,8 +11,8 @@ Locale::Geocode
 Locale::Geocode is a module that provides an
 interface with which to find codes and information
 on geographical locations and their administrative
-subdivisions as defined primarily by ISO-3166-1
-and ISO-3166-2.  It is the most complete ISO-3166
+subdivisions as defined primarily by ISO 3166-1
+and ISO 3166-2.  It is the most complete ISO 3166
 module available on CPAN.
 
 Also included are, where applicable, FIPS codes.
@@ -23,10 +23,10 @@ These codes were taken directly from Locale::SubCountry.
  my $lc     = new Locale::Geocode;
 
  # retrieve a Locale::Geocode::Territory object
- # for the ISO-3166-1 alpha-2 code 'US'
+ # for the ISO 3166-1 alpha-2 code 'US'
  my $lct    = $lc->lookup('US');
 
- # retrieve ISO-3166-1 information for US
+ # retrieve ISO 3166-1 information for US
  my $name   = $lct->name;   # United States
  my $alpha2 = $lct->alpha2; # US
  my $alpha3 = $lct->alpha3; # USA
@@ -35,7 +35,7 @@ These codes were taken directly from Locale::SubCountry.
  # lookup a subdivision of US
  my $lcd    = $lct->lookup('TN');
 
- # retrieve ISO-3166-2 information for US-TN
+ # retrieve ISO 3166-2 information for US-TN
  my $name   = $lcd->name;   # Tennessee
  my $code   = $lcd->code;   # TN
 
@@ -44,10 +44,10 @@ These codes were taken directly from Locale::SubCountry.
  my @divs   = $lct->divisions;
 
  # retrieve a Locale::Geocode::Division object
- # for the ISO-3166-1/ISO-3166-2 combo 'GB-ESS'
+ # for the ISO 3166-1/ISO 3166-2 combo 'GB-ESS'
  my $lct    = $lc->lookup('GB-ESS');
 
- # retrieve ISO-3166-2 information for GB-ESS
+ # retrieve ISO 3166-2 information for GB-ESS
  # as well as special regional information
  my $name   = $lct->name;   # Essex
  my $code   = $lct->name;   # ESS
@@ -85,7 +85,7 @@ These codes were taken directly from Locale::SubCountry.
 
 =cut
 
-our $VERSION = 1.01;
+our $VERSION = 1.10;
 
 use Locale::Geocode::Territory;
 use Locale::Geocode::Division;
@@ -99,8 +99,9 @@ $XML::Simple::PREFERRED_PARSER = 'XML::SAX::Expat';
 # many of these extensions are part of the ISO 3166 standard as a
 # courtesy to other international organizations (such as the UPU or
 # ITU).  others are specific to Locale::Geocode for other practical
-# reasons (such as the usm extension for US overseas military).
-my @exts = qw(upu wco itu uk fx eu usm);
+# reasons (such as the usm extension for US overseas military or
+# usps for all US postal abbreviations).
+my @exts = qw(upu wco itu uk fx eu usm usps);
 my @defs = ();
 
 # parse the XML data
@@ -134,12 +135,25 @@ $data->{name}	= { map { lc($_->{name})	=> $_ } grep { defined $_->{name} }		@$ar
 sub new
 {
 	my $proto = shift;
+	my $class = ref($proto) || $proto;
 
+	my $args = { @_ };
 	my $self = {};
 
-	bless $self, (ref($proto) || $proto);
+	bless $self, $class;
+
+	my @exts = @defs;
 	
-	$self->ext(@defs);
+	if ($args->{ext}) {
+		my $reftype = ref $args->{ext};
+
+		die 'ext argument must be scalar or list reference'
+			if $reftype ne '' && $reftype ne 'ARRAY';
+
+		my @exts = $reftype eq 'ARRAY' ? @{ $args->{ext} } : $args->{ext};
+	}
+
+	$self->ext(@exts);
 
 	return $self;
 }
@@ -6241,7 +6255,7 @@ __DATA__
 		</division>
 		<division>
 			<name>Wallis et Futuna</name>
-			<note>this administrative division is also listed in ISO-3166-1 as WF</note>
+			<note>this administrative division is also listed in ISO 3166-1 as WF</note>
 			<code>WF</code>
 			<fips></fips>
 			<region></region>
@@ -6254,7 +6268,7 @@ __DATA__
 		</division>
 		<division>
 			<name>Nouvelle-Cal&#xe9;donie</name>
-			<note>this administrative division is also listed in ISO-3166-1 as NC</note>
+			<note>this administrative division is also listed in ISO 3166-1 as NC</note>
 			<code>NC</code>
 			<fips></fips>
 			<region></region>
@@ -6369,7 +6383,7 @@ __DATA__
 		</division>
 		<division>
 			<name>Terres Australes Fran&#xe7;aises</name>
-			<note>this administrative division is also listed in ISO-3166-1 as TF</note>
+			<note>this administrative division is also listed in ISO 3166-1 as TF</note>
 			<code>TF</code>
 			<fips></fips>
 			<region></region>
@@ -6418,7 +6432,7 @@ __DATA__
 		</division>
 		<division>
 			<name>Saint-Pierre-et-Miquelon</name>
-			<note>this administrative division is also listed in ISO-3166-1 as PM</note>
+			<note>this administrative division is also listed in ISO 3166-1 as PM</note>
 			<code>PM</code>
 			<fips></fips>
 			<region></region>
@@ -6635,7 +6649,7 @@ __DATA__
 		</division>
 		<division>
 			<name>Mayotte</name>
-			<note>this administrative division is also listed in ISO-3166-1 as YT</note>
+			<note>this administrative division is also listed in ISO 3166-1 as YT</note>
 			<code>YT</code>
 			<fips></fips>
 			<region></region>
@@ -6654,7 +6668,7 @@ __DATA__
 		</division>
 		<division>
 			<name>Polyn&#xe9;sie fran&#xe7;aise</name>
-			<note>this administrative division is also listed in ISO-3166-1 as PF</note>
+			<note>this administrative division is also listed in ISO 3166-1 as PF</note>
 			<code>PF</code>
 			<fips></fips>
 			<region></region>
@@ -6865,7 +6879,7 @@ __DATA__
 		</division>
 		<division>
 			<name>Wallis et Futuna</name>
-			<note>this administrative division is also listed in ISO-3166-1 as WF</note>
+			<note>this administrative division is also listed in ISO 3166-1 as WF</note>
 			<code>WF</code>
 			<fips></fips>
 			<region></region>
@@ -6878,7 +6892,7 @@ __DATA__
 		</division>
 		<division>
 			<name>Nouvelle-Cal&#xe9;donie</name>
-			<note>this administrative division is also listed in ISO-3166-1 as NC</note>
+			<note>this administrative division is also listed in ISO 3166-1 as NC</note>
 			<code>NC</code>
 			<fips></fips>
 			<region></region>
@@ -6993,7 +7007,7 @@ __DATA__
 		</division>
 		<division>
 			<name>Terres Australes Fran&#xe7;aises</name>
-			<note>this administrative division is also listed in ISO-3166-1 as TF</note>
+			<note>this administrative division is also listed in ISO 3166-1 as TF</note>
 			<code>TF</code>
 			<fips></fips>
 			<region></region>
@@ -7042,7 +7056,7 @@ __DATA__
 		</division>
 		<division>
 			<name>Saint-Pierre-et-Miquelon</name>
-			<note>this administrative division is also listed in ISO-3166-1 as PM</note>
+			<note>this administrative division is also listed in ISO 3166-1 as PM</note>
 			<code>PM</code>
 			<fips></fips>
 			<region></region>
@@ -7259,7 +7273,7 @@ __DATA__
 		</division>
 		<division>
 			<name>Mayotte</name>
-			<note>this administrative division is also listed in ISO-3166-1 as YT</note>
+			<note>this administrative division is also listed in ISO 3166-1 as YT</note>
 			<code>YT</code>
 			<fips></fips>
 			<region></region>
@@ -7278,7 +7292,7 @@ __DATA__
 		</division>
 		<division>
 			<name>Polyn&#xe9;sie fran&#xe7;aise</name>
-			<note>this administrative division is also listed in ISO-3166-1 as PF</note>
+			<note>this administrative division is also listed in ISO 3166-1 as PF</note>
 			<code>PF</code>
 			<fips></fips>
 			<region></region>
@@ -13085,7 +13099,7 @@ __DATA__
 		<num>484</num>
 	</territory>
 	<territory>
-		<name>Micronesia</name>
+		<name>Federated States of Micronesia</name>
 		<alpha2>FM</alpha2>
 		<alpha3>FSM</alpha3>
 		<division>
@@ -24173,7 +24187,7 @@ __DATA__
 		</division>
 		<division>
 			<name>American Samoa</name>
-			<note>this administrative division is also listed in ISO-3166-1 as AS</note>
+			<note>this administrative division is also listed in ISO 3166-1 as AS</note>
 			<code>AS</code>
 			<fips>60</fips>
 			<region></region>
@@ -24192,7 +24206,7 @@ __DATA__
 		</division>
 		<division>
 			<name>Puerto Rico</name>
-			<note>this administrative division is also listed in ISO-3166-1 as PR</note>
+			<note>this administrative division is also listed in ISO 3166-1 as PR</note>
 			<code>PR</code>
 			<fips>72</fips>
 			<region></region>
@@ -24331,7 +24345,7 @@ __DATA__
 		</division>
 		<division>
 			<name>Northern Mariana Islands</name>
-			<note>this administrative division is also listed in ISO-3166-1 as MP</note>
+			<note>this administrative division is also listed in ISO 3166-1 as MP</note>
 			<code>MP</code>
 			<fips>69</fips>
 			<region></region>
@@ -24362,14 +24376,14 @@ __DATA__
 		</division>
 		<division>
 			<name>Virgin Islands, U.S.</name>
-			<note>this administrative division is also listed in ISO-3166-1 as VI</note>
+			<note>this administrative division is also listed in ISO 3166-1 as VI</note>
 			<code>VI</code>
 			<fips>78</fips>
 			<region></region>
 		</division>
 		<division>
 			<name>Guam</name>
-			<note>this administrative division is also listed in ISO-3166-1 as GU</note>
+			<note>this administrative division is also listed in ISO 3166-1 as GU</note>
 			<code>GU</code>
 			<fips>66</fips>
 			<region></region>
@@ -24394,7 +24408,7 @@ __DATA__
 		</division>
 		<division>
 			<name>United States Minor Outlying Islands</name>
-			<note>this administrative division is also listed in ISO-3166-1 as UM</note>
+			<note>this administrative division is also listed in ISO 3166-1 as UM</note>
 			<code>UM</code>
 			<fips></fips>
 			<region></region>
@@ -24421,16 +24435,37 @@ __DATA__
 			<name>Armed Forces Americas (except Canada)</name>
 			<code>AA</code>
 			<ext>usm</ext>
+			<ext>usps</ext>
 		</division>
 		<division>
 			<name>Armed Forces Europe / Canada / Middle East / Africa</name>
 			<code>AE</code>
 			<ext>usm</ext>
+			<ext>usps</ext>
 		</division>
 		<division>
 			<name>Armed Forces Pacific</name>
 			<code>AP</code>
 			<ext>usm</ext>
+			<ext>usps</ext>
+		</division>
+		<division>
+			<name>Federated States of Micronesia</name>
+			<code>FM</code>
+			<note>this soverign nation (ISO 3166-1: FM) is recognized as a domestic postal destination by the United States Postal Service using the associated abbreviation</note>
+			<ext>usps</ext>
+		</division>
+		<division>
+			<name>Marshall Islands</name>
+			<code>MH</code>
+			<note>this soverign nation (ISO 3166-1: MH) is recognized as a domestic postal destination by the United States Postal Service using the associated abbreviation</note>
+			<ext>usps</ext>
+		</division>
+		<division>
+			<name>Palau</name>
+			<code>PW</code>
+			<note>this soverign nation (ISO 3166-1: PW) is recognized as a domestic postal destination by the United States Postal Service using the associated abbreviation</note>
+			<ext>usps</ext>
 		</division>
 		<num>840</num>
 	</territory>

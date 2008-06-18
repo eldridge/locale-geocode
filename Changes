@@ -1,6 +1,17 @@
 Revision history for Perl extension Locale::Geocode
 
-1.01 - Tue Mar 4 13:09:33 CST 2008
+1.10 - Wed Jun 18 10:56:58 CDT 2008
+ - allow specifying the extension configuration at instantiation
+ - add new extension "usps" that includes three soverign nations that
+   the United States Postal Service recognizes as domestic state
+   abbreviations
+ - change "Micronesia" to "Federated States of Micronesia" to avoid
+   confusion with the region known as Micronesia, which includes seven
+   distinct territories
+ - use feedback-enabled test macros (cmp_ok, is, etc) where appropriate
+ - replace all occurrences of ISO-3166-1 with ISO 3166-1
+
+1.01 - Mon Jun 9 14:38:39 CDT 2008
  - include Module::Install (forgot to add it to the manifest)
 
 1.0 - Tue Mar 4 13:09:33 CST 2008
@@ -19,7 +30,8 @@ Revision history for Perl extension Locale::Geocode
  - allow LGT to lookup by zero-based index
 
 0.08 - 2007-03-01 12:21:47
- - for the sake of brevity, replace 'United States of America' with 'United States'
+ - for the sake of brevity, replace 'United States of America' with
+   'United States'
 
 0.07 - 2007-02-14 18:42:28
  - don't return undef when lookup fails

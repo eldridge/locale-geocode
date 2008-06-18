@@ -1,5 +1,5 @@
 name:               Locale-Geocode
-version:            1.01
+version:            1.10
 abstract:           complete ISO 3166-1 and limited ISO 3166-2 implementation
 license:            perl
 version_from:       lib/Locale/Geocode.pm
