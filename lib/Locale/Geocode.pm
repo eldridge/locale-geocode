@@ -16,7 +16,6 @@ and ISO 3166-2.  It is the most complete ISO 3166
 module available on CPAN.
 
 Also included are, where applicable, FIPS codes.
-These codes were taken directly from Locale::SubCountry.
 
 =head1 SYNOPSIS
 
@@ -85,7 +84,7 @@ These codes were taken directly from Locale::SubCountry.
 
 =cut
 
-our $VERSION = 1.10;
+our $VERSION = 1.11;
 
 use Locale::Geocode::Territory;
 use Locale::Geocode::Division;
@@ -150,7 +149,7 @@ sub new
 		die 'ext argument must be scalar or list reference'
 			if $reftype ne '' && $reftype ne 'ARRAY';
 
-		my @exts = $reftype eq 'ARRAY' ? @{ $args->{ext} } : $args->{ext};
+		@exts = $reftype eq 'ARRAY' ? @{ $args->{ext} } : $args->{ext};
 	}
 
 	$self->ext(@exts);
@@ -265,9 +264,8 @@ sub import { @defs = @_[1..$#_] }
 
 =head1 SEE ALSO
 
- L<Locale::SubCountry>
- L<Geography::Countries>
- L<Geography::Country>
+ L<Locale::Geocode::Territory>
+ L<Locale::Geocode::Division>
 
 =cut
 

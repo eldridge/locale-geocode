@@ -1,5 +1,6 @@
 package Locale::Geocode::Territory;
 
+use warnings;
 use strict;
 
 =head1 NAME
@@ -40,12 +41,6 @@ must be true of the territory:
  # returns an array of Locale::Geocode::Division
  # objects representing all divisions of US
  my @divs   = $lct->divisions;
-
-=head1 SOURCES
-
- Wikipedia - http://en.wikipedia.org/wiki/ISO_3166
- ISO 3166-1 - http://www.statoids.com/wab.html
- ISO 3166-2 - Locale::SubCountry
 
 =cut
 
@@ -200,6 +195,10 @@ sub note
 
 =item divisions
 
+returns an array of Locale::Geocode::Division objects
+representing all territorial divisions.  this method
+honors the configured extensions.
+
 =cut
 
 sub divisions
@@ -207,6 +206,27 @@ sub divisions
 	my $self = shift;
 
 	return map { $self->lookup($_->{code}) || () } @{ $self->{data}->{division} };
+}
+
+=item divisions_sorted
+
+the same as divisions, only all objects are sorted
+according to the specified metadata.  if metadata
+is not specified (or is invalid), then all divisions
+are sorted by name.  the supported metadata is any
+data-oriented method of Locale::Geocode::Division
+(name, code, fips, region, et alia).
+
+=cut
+
+sub divisions_sorted
+{
+	my $self = shift;
+	my $meta = lc shift || 'name';
+
+	$meta = 'name' if not grep { $meta eq $_ } @Locale::Geocode::Division::meta;
+
+	return sort { $a->$meta cmp $b->$meta } $self->divisions;
 }
 
 =item num_divisions
@@ -235,9 +255,7 @@ sub num_divisions
 =head1 SEE ALSO
 
  L<Locale::Geocode>
- L<Locale::SubCountry>
- L<Geography::Countries>
- L<Geography::Country>
+ L<Locale::Geocode::Division>
 
 =cut
 

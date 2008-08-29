@@ -1,5 +1,10 @@
 Revision history for Perl extension Locale::Geocode
 
+1.11 - Thu Aug 28 18:51:23 CDT 2008
+ - fix specifying extension configuration at instantiation
+ - added new divisions_sorted method to Locale::Geocode::Territory
+   to return the divisions sorted by the specified meta
+
 1.10 - Wed Jun 18 10:56:58 CDT 2008
  - allow specifying the extension configuration at instantiation
  - add new extension "usps" that includes three soverign nations that

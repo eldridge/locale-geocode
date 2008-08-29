@@ -1,5 +1,6 @@
 package Locale::Geocode::Division;
 
+use warnings;
 use strict;
 
 =head1 NAME
@@ -28,15 +29,11 @@ ISO-3166-2.
  # objects representing all divisions of US
  my @divs   = $lct->divisions;
 
-=head1 SOURCES
-
- Wikipedia - http://en.wikipedia.org/wiki/ISO_3166
- ISO 3166-1 - http://www.statoids.com/wab.html
- ISO 3166-2 - Locale::SubCountry
-
 =cut
 
 use overload '""' => sub { return shift->code };
+
+our @meta = qw(name code fips region has_notes num_notes);
 
 =head1 METHODS
 
@@ -73,7 +70,7 @@ sub new
 
 sub name { return shift->{data}->{name} }
 
-=item num
+=item code
 
 =cut
 
@@ -134,9 +131,7 @@ sub note { return shift->{notes}->[shift] }
 =head1 SEE ALSO
 
  L<Locale::Geocode>
- L<Locale::SubCountry>
- L<Geography::Countries>
- L<Geography::Country>
+ L<Locale::Geocode::Territory>
 
 =cut
 
