@@ -104,7 +104,6 @@ my @exts = qw(upu wco itu uk fx eu usm usps);
 my @defs = ();
 
 # parse the XML data
-my $str = <DATA>;
 my $opts = { ForceArray => [ 'division', 'ext', 'note' ], KeyAttr => [], SuppressEmpty => 1 };
 my $data = { raw => XMLin(\*DATA, %$opts) };
 
