@@ -100,8 +100,8 @@ $XML::Simple::PREFERRED_PARSER = 'XML::SAX::Expat';
 # ITU).  others are specific to Locale::Geocode for other practical
 # reasons (such as the usm extension for US overseas military or
 # usps for all US postal abbreviations).
-my @exts = qw(upu wco itu uk fx eu usm usps);
-my @defs = ();
+my @exts = qw(upu wco itu uk fx eu usm usps ust);
+my @defs = qw(ust);
 
 # parse the XML data
 my $opts = { ForceArray => [ 'division', 'ext', 'note' ], KeyAttr => [], SuppressEmpty => 1 };
@@ -141,7 +141,7 @@ sub new
 	bless $self, $class;
 
 	my @exts = @defs;
-	
+
 	if ($args->{ext}) {
 		my $reftype = ref $args->{ext};
 
@@ -24188,6 +24188,7 @@ __DATA__
 			<code>AS</code>
 			<fips>60</fips>
 			<region></region>
+			<ext>ust</ext>
 		</division>
 		<division>
 			<name>Virginia</name>
@@ -24207,6 +24208,7 @@ __DATA__
 			<code>PR</code>
 			<fips>72</fips>
 			<region></region>
+			<ext>ust</ext>
 		</division>
 		<division>
 			<name>New Mexico</name>
@@ -24346,6 +24348,7 @@ __DATA__
 			<code>MP</code>
 			<fips>69</fips>
 			<region></region>
+			<ext>ust</ext>
 		</division>
 		<division>
 			<name>Wisconsin</name>
@@ -24377,6 +24380,7 @@ __DATA__
 			<code>VI</code>
 			<fips>78</fips>
 			<region></region>
+			<ext>ust</ext>
 		</division>
 		<division>
 			<name>Guam</name>
@@ -24384,6 +24388,7 @@ __DATA__
 			<code>GU</code>
 			<fips>66</fips>
 			<region></region>
+			<ext>ust</ext>
 		</division>
 		<division>
 			<name>South Carolina</name>
@@ -24409,6 +24414,7 @@ __DATA__
 			<code>UM</code>
 			<fips></fips>
 			<region></region>
+			<ext>ust</ext>
 		</division>
 		<division>
 			<name>Tennessee</name>
