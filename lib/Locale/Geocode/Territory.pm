@@ -11,7 +11,7 @@ Locale::Geocode::Territory
 
 Locale::Geocode::Territory represents an individual
 country or territory as listed in ISO-3166-1.  This
-class provides methods for returning information 
+class provides methods for returning information
 about the territory and any administrative divisions
 therein.
 
@@ -23,7 +23,7 @@ In order for a country or territory to be listed in
 the Country Names bulletin, one of the following
 must be true of the territory:
 
-  - is a United Nations member state a member 
+  - is a United Nations member state a member
   - is a member of any of the UN specialized agencies
   - a party to the Statute of the International Court of Justice
 
@@ -73,10 +73,10 @@ sub new
 					Locale::Geocode::data()->{alpha3}->{$key} ||
 					Locale::Geocode::data()->{num}->{$key} ||
 					Locale::Geocode::data()->{name}->{$key};
-	
+
 	return undef if not defined $self->{data};
 	return undef if not $lg->chkext($self->{data});
-	
+
 	return bless $self, $class;
 }
 
@@ -149,7 +149,7 @@ sub has_notes
 	my $self = shift;
 
 	my $data = $self->{data};
-	
+
 	return $data->{note} && scalar @{ $data->{note} } > 0 ? 1 : 0
 }
 
@@ -160,9 +160,9 @@ sub has_notes
 sub num_notes
 {
 	my $self = shift;
-	
+
 	my $data = $self->{data};
-	
+
 	return $data->{note} ? scalar @{ $data->{note} } : 0;
 }
 
@@ -173,9 +173,9 @@ sub num_notes
 sub notes
 {
 	my $self = shift;
-	
+
 	my $data = $self->{data};
-	
+
 	return $data->{note} ? @{ $data->{note} } : ();
 }
 
@@ -187,9 +187,9 @@ sub note
 {
 	my $self	= shift;
 	my $idx		= shift;
-	
+
 	my $data = $self->{data};
-	
+
 	return $data->{note} ? $data->{note}->[$idx] : undef;
 }
 

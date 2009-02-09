@@ -57,10 +57,10 @@ sub new
 	$self->{data} =	$lct->{data}->{divs_code}->{$key} ||
 					$lct->{data}->{divs_fips}->{$key} ||
 					$lct->{data}->{divs_name}->{$key};
-	
+
 	return undef if not defined $self->{data};
 	return undef if not $lct->lg->chkext($self->{data});
-	
+
 	return bless $self, $class;
 }
 
