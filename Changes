@@ -1,9 +1,21 @@
 Revision history for Perl extension Locale::Geocode
 
+1.20 - Mon Feb 9 19:10:35 CST 2009
+ - add new ext_enable and ext_disable methods for selectively enabling
+   or disabling only the specified subset of all supported extensions
+ - add new "ust" extention for united states territories.  this
+   extension is ALWAYS on unless you explicitly disable it, thus it
+   retains compatibility with previous releases.
+ - rewrite ext method so that the extension list is constructed in a
+   more straightforward fashion.  while the behavior of the ext method
+   was never fully documented, the behavior now is, for multiple flags
+   for the same extension (ie, qw(usm -usm usm))), the most recent
+   element in the list is the one that is honored.
+
 1.11 - Thu Aug 28 18:51:23 CDT 2008
  - fix specifying extension configuration at instantiation
- - added new divisions_sorted method to Locale::Geocode::Territory
-   to return the divisions sorted by the specified meta
+ - added new divisions_sorted method to Locale::Geocode::Territory to
+   return the divisions sorted by the specified meta
 
 1.10 - Wed Jun 18 10:56:58 CDT 2008
  - allow specifying the extension configuration at instantiation

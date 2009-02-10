@@ -84,7 +84,7 @@ Also included are, where applicable, FIPS codes.
 
 =cut
 
-our $VERSION = 1.11;
+our $VERSION = 1.20;
 
 use Locale::Geocode::Territory;
 use Locale::Geocode::Division;
