@@ -227,14 +227,44 @@ sub ext
 	my $self = shift;
 
 	if (scalar @_ > 0) {
-		my $all	= grep { $_ eq 'all' } @_;
-		my %neg	= map { substr($_, 1) => 1 } grep /^-/, @_;
-		my @a	= grep { !$neg{$_} } ($all ? @exts : grep !/^(-.*|all)$/, @_);
-
-		$self->{ext} = { map { $_ => 1 } @a };
+		$self->{ext} =
+		{
+			ust => 1, # 'ust' is always on unless explicitly disabled
+			map {
+				/^-(.*)$/
+					? ($1 => 0)
+					: $_ eq 'all'
+						? map { $_ => 1 } @exts
+						: ($_ => 1)
+			} @_
+		};
 	}
 
-	return keys %{ $self->{ext} };
+	return grep { $self->{ext}->{$_} } keys %{ $self->{ext} };
+}
+
+=item ext_enable
+
+=cut
+
+sub ext_enable
+{
+	my $self = shift;
+
+	foreach my $ext (@_) {
+		$self->{ext}->{$ext} = 1 if grep { $ext eq $_ } @exts;
+	}
+}
+
+=item ext_disable
+
+=cut
+
+sub ext_disable
+{
+	my $self = shift;
+
+	delete $self->{ext}->{$_} foreach @_;
 }
 
 sub chkext
@@ -271,7 +301,7 @@ sub import { @defs = @_[1..$#_] }
 1;
 
 __DATA__
-<?xml version="1.0" encoding="UTF-16" ?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <iso3166>
 	<territory>
 		<name>Afghanistan</name>

@@ -1,4 +1,4 @@
-use Test::More tests => 66;
+use Test::More tests => 78;
 
 use_ok('Locale::Geocode');
 
@@ -57,7 +57,7 @@ ok(!defined($lgd), 'lookup ISO 3166-1 reserved alpha-2 code "UK"');
 
 # enabling single extension for UK->GB mapping
 $lg->ext(qw(uk));
-ok(eq_array([ sort $lg->ext ], [ qw(uk) ]), 'set extensions for reserved ISO 3166-1 alpha-2 code "UK"');
+ok(eq_array([ sort $lg->ext ], [ qw(uk ust) ]), 'set extensions for reserved ISO 3166-1 alpha-2 code "UK"');
 
 $lgt = $lg->lookup('UK');
 ok(!defined($lgd), 'lookup ISO 3166-1 reserved alpha-2 code "UK"');
@@ -81,9 +81,45 @@ cmp_ok(
 	'US: divisions method returns only Locale::Geocode::Division objects'
 );
 
+# disable ust extension with the ext method
+$lg->ext(qw(uk -ust));
+ok(eq_array([ sort $lg->ext ], [ qw(uk) ]), 'disable ust extension using ext method');
+
+@lgds = $lgt->divisions;
+cmp_ok($lgt->num_divisions, '==', 51, 'US: num_divisions is 51');
+cmp_ok(scalar(@lgds), '==', 51, 'US: divisions method returns a 51 member list');
+cmp_ok(
+	scalar(grep { ref $_ eq 'Locale::Geocode::Division' } @lgds), '==', 51,
+	'US: divisions method returns only Locale::Geocode::Division objects'
+);
+
+# re-enable ust extension using the ext_enable method
+$lg->ext_enable('ust');
+ok(eq_array([ sort $lg->ext ], [ qw(uk ust) ]), 'enable ust extension using ext_enable method');
+
+@lgds = $lgt->divisions;
+cmp_ok($lgt->num_divisions, '==', 57, 'US: num_divisions is 57');
+cmp_ok(scalar(@lgds), '==', 57, 'US: divisions method returns a 57 member list');
+cmp_ok(
+	scalar(grep { ref $_ eq 'Locale::Geocode::Division' } @lgds), '==', 57,
+	'US: divisions method returns only Locale::Geocode::Division objects'
+);
+
+# re-disable ust extension using the ext_disable method
+$lg->ext_disable('ust');
+ok(eq_array([ sort $lg->ext ], [ qw(uk) ]), 'disable ust extension using ext_disable method');
+
+@lgds = $lgt->divisions;
+cmp_ok($lgt->num_divisions, '==', 51, 'US: num_divisions is 51');
+cmp_ok(scalar(@lgds), '==', 51, 'US: divisions method returns a 51 member list');
+cmp_ok(
+	scalar(grep { ref $_ eq 'Locale::Geocode::Division' } @lgds), '==', 51,
+	'US: divisions method returns only Locale::Geocode::Division objects'
+);
+
 # enabling multiple extensions at once (US military, UK->GB alias)
 $lg->ext(qw(usm uk));
-ok(eq_array([ sort $lg->ext ], [ qw(uk usm) ]), 'enable extensions for non ISO 3166 United States Military Postal Service Agency codes');
+ok(eq_array([ sort $lg->ext ], [ qw(uk usm ust) ]), 'enable extensions for non ISO 3166 United States Military Postal Service Agency codes');
 
 $lgd = $lgt->lookup('AP');
 ok(defined($lgd), 'US: lookup non ISO 3166-2 code "AP"');
@@ -103,7 +139,7 @@ cmp_ok(
 
 # usps extension for blanket coverage of USPS recognized postal abbreviations
 $lg->ext(qw(usps uk));
-ok(eq_array([ sort $lg->ext ], [ qw(uk usps) ]), 'enable extensions for non ISO 3166 United States Postal Service codes');
+ok(eq_array([ sort $lg->ext ], [ qw(uk usps ust) ]), 'enable extensions for non ISO 3166 United States Postal Service codes');
 
 $lgd = $lgt->lookup('AP');
 ok(defined($lgd), 'US: lookup non ISO 3166-2 code "AP"');
@@ -125,7 +161,7 @@ cmp_ok(
 
 # enabling multiple extensions at once (European Union and WCO)
 $lg->ext(qw(eu wco));
-ok(eq_array([ sort $lg->ext ], [ qw(eu wco) ]), 'set extensions for reserved ISO 3166 codes for EU/WCO statistical purposes');
+ok(eq_array([ sort $lg->ext ], [ qw(eu ust wco) ]), 'set extensions for reserved ISO 3166 codes for EU/WCO statistical purposes');
 
 $lgt = $lg->lookup('IC');
 ok(defined($lgt), 'IC: lookup territory via reserved ISO 3166-1 alpha-2 code "IC"');
