@@ -1,0 +1,95 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+use DBI;
+use XML::Simple;
+use Data::Dumper;
+
+my $dbh = DBI->connect('dbi:mysql:localhost;database=iso3166', 'root', '');
+
+my %sth;
+
+$sth{list}	= $dbh->prepare('SELECT * FROM ISO_3166_2_list WHERE ISO_3166_1_Alpha_2_code = ? ORDER BY ISO_3166_2_Code');
+$sth{lang}	= $dbh->prepare('SELECT * FROM ISO_3166_2_languages WHERE ISO_3166_1_Alpha_2_code = ? AND ISO_3166_2_Code = ? ORDER BY Language_Code');
+$sth{roman}	= $dbh->prepare('SELECT * FROM ISO_3166_2_Romanization_systems WHERE ID = ?');
+
+my $opts = { ForceArray => [ 'division', 'ext', 'note' ], KeyAttr => [], SuppressEmpty => 1 };
+my $data = XMLin('lg1.xml', %$opts);
+my @terr = sort { $a->{alpha2} cmp $b->{alpha2} } @{ $data->{territory} };
+
+print "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n";
+print "<geocode>\n";
+
+foreach my $territory (@terr) {
+	$sth{list}->execute($territory->{alpha2});
+
+	utf8::encode($territory->{name});
+
+	print "\t<territory>\n";
+	print "\t\t<name lang=\"\" type=\"short\">$territory->{name}</name>\n";
+	print "\t\t<name lang=\"en\" type=\"short\">$territory->{name}</name>\n";
+	print "\t\t<code standard=\"iso\" type=\"alpha2\">$territory->{alpha2}</code>\n";
+	print "\t\t<code standard=\"iso\" type=\"alpha3\">$territory->{alpha3}</code>\n";
+	print "\t\t<code standard=\"iso\" type=\"numeric\">$territory->{num}</code>\n";
+
+	while (my $row = $sth{list}->fetchrow_hashref) {
+		$sth{lang}->execute($territory->{alpha2}, $row->{ISO_3166_2_Code});
+
+		print "\t\t<division type=\"$row->{Subdivision_Category}\">\n";
+
+		my $default;
+		my @names;
+
+		$row->{ISO_3166_2_Code} =~ s/\*$//;
+
+		while (my $row = $sth{lang}->fetchrow_hashref) {
+			my $attr = { btype => "short", alang => $row->{Language_Code} };
+
+			$row->{Subdivision_Name} =~ s/ \(see also.*\)//;
+
+			if ($row->{Romanization_System_ID}) {
+				$sth{roman}->execute($row->{Romanization_System_ID});
+
+				my $row = $sth{roman}->fetchrow_hashref;
+
+				$row->{Romanization_System} = 'BGN/PCGN'
+					if $row->{Romanization_System} =~ /BGN\/PCGN/;
+
+				$attr->{cromanization} = $row->{Romanization_System};
+			}
+
+			my $attrs = join ' ', map { substr($_,1) . "=\"$attr->{$_}\"" } sort keys %$attr;
+
+			push @names, "<name $attrs>$row->{Subdivision_Name}</name>";
+
+			if ($row->{Romanization_System_ID}) {
+				$attr->{alang} = '';
+
+				my $attrs = join ' ', map { substr($_,1) . "=\"$attr->{$_}\"" } sort keys %$attr;
+				my $xml = "<name $attrs>$row->{Subdivision_Name}</name>";
+
+				$default = $xml if $row->{Language_Code} eq 'en' or not defined $default;
+			}
+		}
+
+		$default = $names[0] if not defined $default;
+
+		$default =~ s/lang=".."/lang=""/;
+
+		print "\t\t\t$default\n" if $default;
+		print "\t\t\t$_\n" foreach @names;
+
+		print "\t\t\t<code standard=\"iso\" type=\"\">$row->{ISO_3166_2_Code}</code>\n";
+		print "\t\t\t<code standard=\"fips\" type=\"\">...</code>\n";
+		print "\t\t\t<code standard=\"iso\" type=\"region\">$row->{Regional_Division}</code>\n"
+			if $row->{Regional_Division};
+		print "\t\t</division>\n";
+	}
+
+	print "\t</territory>\n";
+}
+
+print "</geocode>\n";
+

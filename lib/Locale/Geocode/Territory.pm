@@ -61,21 +61,18 @@ use Locale::Geocode::Division;
 
 sub new
 {
-	my $proto	= shift;
-	my $key		= lc(shift);
-	my $lg		= shift || new Locale::Geocode;
+	my $proto = shift;
+	my $class = ref $proto || $proto;
 
-	my $class	= ref($proto) || $proto;
-	my $self	= {};
-	$self->{lg}	= $lg;
+	# maintain 1.x compatibility by explicitly using
+	# Locale::Geocode->lookup
 
-	$self->{data} =	Locale::Geocode::data()->{alpha2}->{$key} ||
-					Locale::Geocode::data()->{alpha3}->{$key} ||
-					Locale::Geocode::data()->{num}->{$key} ||
-					Locale::Geocode::data()->{name}->{$key};
+	return Locale::Geocode->new->lookup($_[0])
+		if ref $_[0] ne 'Locale::Geocode';
 
-	return undef if not defined $self->{data};
-	return undef if not $lg->chkext($self->{data});
+	my $self = { lg => shift, node => shift };
+
+	return undef if not defined $self->{node};
 
 	return bless $self, $class;
 }
@@ -96,6 +93,61 @@ sub lookup
 	my $key		= shift;
 
 	return new Locale::Geocode::Division $key, $self;
+
+	my $rv = undef;
+
+	for (ref $key) {
+		/^$/ && do
+		{
+			my ($iso3166_1, $iso3166_2) = split '-', $key;
+
+			$rv = new Locale::Geocode::Territory $iso3166_1, $self;
+			$rv = $rv->lookup($iso3166_2) if $rv && $iso3166_2;
+
+			last;
+		};
+
+		/HASH/ && do
+		{
+			# don't lookup a damn thing if the user didn't
+			# ask us to...
+
+			last if not scalar keys %$key;
+
+			# use lookup tables in a lazy fashion, reusing
+			# the keys from the hashref the user handed us.
+
+			my @a = map {
+				new Set::Scalar $self->{data}->{$_}->{lc $key->{$_}}->{alpha2}
+			} keys %$key;
+
+			# find the intersection of the aggregate result
+			# of the lookups.  i'd rather this be utilized
+			# as a class method like the cartesian product
+			# method, but it doesn't appear to be possible.
+			# there's an overloaded multiplication operator
+			# for intersections, but it looks strange and
+			# gives the impression it's a cartesian product.
+			# so i'll just use the instance method...
+
+			my $set	= scalar(@a) > 1
+				? $a[0]->intersection($a[1 .. $#a])
+				: $a[0];
+
+			# recursive lookup; use the first member of the
+			# Set if there are multiples.  handling multiple
+			# items may be a future feature, but for now we
+			# are just going to return the first one.
+
+			$rv = $self->lookup($set->members);
+
+			last;
+		};
+
+		die "unable to handle $_ in lookup";
+	}
+
+	return $rv;
 }
 
 =item lookup_by_index
@@ -114,31 +166,84 @@ sub lookup_by_index
 
 =cut
 
-sub name { return shift->{data}->{name} }
+sub name
+{
+	my $self = shift;
+
+	return $self->name('' => 'short') if scalar @_ == 0;
+
+	my $lang = shift;
+	my $type = shift;
+
+	my $query	= { lang => $lang, type => $type };
+	my $path	= Locale::Geocode->_serialize_query('name', $query);
+
+	my $set = $self->{node}->find($path);
+
+	return undef if not $set->size;
+
+	my @a = map { $_->getChildNode(1)->toString } $set->get_nodelist;
+
+	return scalar @a > 1 ? @a : $a[0];
+}
+
+=item code
+
+=cut
+
+sub code
+{
+	my $self		= shift;
+	my $standard	= shift;
+	my $type		= shift;
+
+	my $query	= { standard => $standard, type => $type };
+	my $path	= Locale::Geocode->_serialize_query('code', $query);
+
+	my $set = $self->{node}->find($path);
+
+	return undef if not $set->size;
+
+	my @a = map { $_->getChildNode(1)->toString } $set->get_nodelist;
+
+	return scalar @a > 1 ? @a : $a[0];
+}
 
 =item num
 
 =cut
 
-sub num { return shift->{data}->{num} }
+sub num
+{
+	return shift->code(iso => 'numeric');
+}
 
 =item alpha2
 
 =cut
 
-sub alpha2 { return shift->{data}->{alpha2} }
+sub alpha2
+{
+	return shift->code(iso => 'alpha2');
+}
 
 =item alpha3
 
 =cut
 
-sub alpha3 { return shift->{data}->{alpha3} }
+sub alpha3
+{
+	return shift->code(iso => 'alpha3');
+}
 
 =item fips
 
 =cut
 
-sub fips { return shift->{data}->{fips} }
+sub fips
+{
+	return shift->code(fips => '');
+}
 
 =item has_notes
 
